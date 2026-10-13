@@ -1,0 +1,8 @@
+$kind: http-request
+name: http://localhost:8080/api/qr/CC-7701FFAB
+description: ""
+url: http://localhost:8080/api/qr/CC-7701FFAB
+method: GET
+auth:
+  type: bearer
+order: 1791305720100
