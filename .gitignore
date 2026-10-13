@@ -1,13 +1,19 @@
-.DS_Store
-.vscode/
-.postman/
-.idea/
-**/target/
-**/node_modules/
-**/dist/
-**/dist-ssr/
+
+# Secrets
 .env
 .env.*
 !.env.example
-*.log
-logs/
+
+# Java / Maven
+backend/target/
+*.class
+
+# React / Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE and system files
+.DS_Store
+.idea/
+.vscode/
+.postman/
