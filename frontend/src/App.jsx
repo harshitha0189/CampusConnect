@@ -4,6 +4,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 
+const API_URL = "https://campusconnect-backend-xqjt.onrender.com";
+
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,10 +21,16 @@ function App() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
+        `${API_URL}/api/auth/login`,
         {
           email: email.trim(),
-          password
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 60000,
         }
       );
 
@@ -36,7 +44,6 @@ function App() {
         return;
       }
 
-      // Read the role claim from the JWT payload.
       const payloadPart = token.split(".")[1];
 
       if (!payloadPart) {
@@ -53,25 +60,22 @@ function App() {
           atob(base64)
             .split("")
             .map((char) =>
-              "%" +
-              char.charCodeAt(0)
-                .toString(16)
-                .padStart(2, "0")
+              "%" + char.charCodeAt(0).toString(16).padStart(2, "0")
             )
             .join("")
         )
       );
 
-      localStorage.setItem("Token", token);
-
       const role = String(
         payload.role ||
-        payload.roles?.[0] ||
-        payload.authorities?.[0] ||
-        ""
+          payload.roles?.[0] ||
+          payload.authorities?.[0] ||
+          ""
       )
         .replace(/^ROLE_/, "")
         .toUpperCase();
+
+      localStorage.setItem("Token", token);
 
       if (role === "ORGANIZER") {
         navigate("/organizer");
@@ -80,18 +84,22 @@ function App() {
       } else if (role === "ADMIN") {
         navigate("/admin");
       } else {
+        localStorage.removeItem("Token");
         setMessage(
           "Login succeeded, but the account role is not supported."
         );
-        localStorage.removeItem("Token");
       }
     } catch (error) {
       localStorage.removeItem("Token");
 
       if (error.response) {
         setMessage(`Login failed: ${error.response.status}`);
+      } else if (error.code === "ECONNABORTED") {
+        setMessage("The backend took too long to respond. Please try again.");
       } else {
-        setMessage("Cannot connect to the backend.");
+        setMessage(
+          "Cannot connect to the backend. Please check the connection."
+        );
       }
     } finally {
       setLoading(false);
